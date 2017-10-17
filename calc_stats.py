@@ -92,21 +92,30 @@ def calc_beacon_freq( users_dict, beacon_id ):
 	freq_dict = {} #(time_of_day,num_hits)
 	min = timedelta(minute=1)
 
-	curr_time = start_time
-	end = end_time
-
+	#iterate through all users
 	for user in user_dict:
+		#iterate through each session for a given user
 		for touple, beacons in user_dict[user].items():
 			#filter for current beacon only
 			if int(touple[0]) != num:
 				continue
-			while curr_time < end:
-				#do work
+			
+			curr_time 	= beacons[0]
+			end 		= beacons[1]
+			dwell 		= beacons[2]
+
+			#increment value for each minute user was in range
+			while curr_time <= end:
+				if curr_time.strftime("%H:%M:%S") not in freq_dict.keys():
+					freq_dict[curr_time.strftime("%H:%M:%S")] = int(1)
+				else:
+					freq_dict[curr_time.strftime("%H:%M:%S")] += 1
+
 				curr_time = curr_time + min
 
 	return freq_dict
 
-def plot_gantt( master_dict ):
+def plot_gantt_region( master_dict, user ):
 	#build user dict
 	df = []
 	for touple, beacons in master_dict[user].items():
@@ -168,7 +177,6 @@ if __name__ == "__main__":
 
 		#Iterate through csv
 		for entry in incsv:
-			
 
 			#Sum total dwell times
 			dwell_sum += int(entry[13])
@@ -237,4 +245,4 @@ if __name__ == "__main__":
 		#py.iplot(user_data, filename='user_avg_dwell_bar')
 
 		#Plot single user gantt
-		plot_gantt(master_dict)	
+		plot_gantt_region(master_dict, user)	
