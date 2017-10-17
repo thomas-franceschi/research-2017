@@ -14,6 +14,9 @@ year = 2017
 month = '08'
 day = 26
 
+start_time = datetime(2017, int(month), day, 10, 30, 0, 0)
+end_time = datetime(2017, int(month), day, 22, 0, 0, 0)
+
 #csv to read in
 csvfile = "ndMobile_" + str(year) + "-" + str(month) + "-" + str(day) + ".csv"
 
@@ -76,9 +79,6 @@ def load_csv( filename ):
 			time_exited 	= datetime.strptime(entry[6], "%Y-%m-%d %H:%M:%S")
 
 			#skip off-hours
-			start_time = datetime(2017, int(month), day, 10, 30, 0, 0)
-			end_time = datetime(2017, int(month), day, 22, 0, 0, 0)
-
 			if time_entered < start_time or time_entered > end_time:
 				continue
 
@@ -93,6 +93,28 @@ def load_csv( filename ):
 			single_user_dict.clear
 
 	return (users_dict)
+
+#calculate frequency of users over time for a beacon
+###IN PROGRESS###
+def calc_beacon_freq( users_dict, beacon_id ):
+
+	num = int(beacon_id)
+	freq_dict = {} #(time_of_day,num_hits)
+	min = timedelta(minute=1)
+
+	curr_time = start_time
+	end = end_time
+
+	for user in user_dict:
+		for touple, beacons in user_dict[user].items():
+			#filter for current beacon only
+			if int(touple[0]) != num:
+				continue
+			while curr_time < end:
+				#do work
+				curr_time = curr_time + min
+
+	return freq_dict
 
 def print_dict( users_dict ):
 	for user, beacon in users_dict.items():
@@ -117,8 +139,6 @@ if __name__ == "__main__":
 
 	#Read in csv file
 	master_dict = load_csv(csvfile)
-	#print_dict(master_dict)
-	print_user(master_dict, user)
 
 	with open(csvfile) as file:
 		dwell_sum 	= 0
