@@ -88,17 +88,18 @@ def load_csv( filename ):
 ###IN PROGRESS###
 def calc_beacon_freq( users_dict, beacon_id ):
 
-	num = int(beacon_id)
+	num = str(beacon_id)
 	freq_dict = {} #(time_of_day,num_hits)
-	min = timedelta(minute=1)
+	min = timedelta(minutes=1)
 
 	#iterate through all users
-	for user in user_dict:
+	for user in users_dict:
 		#iterate through each session for a given user
-		for touple, beacons in user_dict[user].items():
+		for touple, beacons in users_dict[user].items():
 			#filter for current beacon only
-			if int(touple[0]) != num:
+			if touple[0] != num:
 				continue
+			print("found")
 			
 			curr_time 	= beacons[0]
 			end 		= beacons[1]
@@ -115,12 +116,16 @@ def calc_beacon_freq( users_dict, beacon_id ):
 
 	return freq_dict
 
+###IN PROGRESS###
+def plot_beacon_freq(freq_dict):
+
+	return
+
 def plot_gantt_region( master_dict, user ):
 	#build user dict
 	df = []
 	for touple, beacons in master_dict[user].items():
 		beacon_id = str(touple[0])
-		print(beacon_id)
 		start = beacons[0].strftime("%Y-%m-%d %H:%M:%S")
 		finish = beacons[1].strftime("%Y-%m-%d %H:%M:%S")
 
