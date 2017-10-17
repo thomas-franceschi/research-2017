@@ -5,17 +5,7 @@ import plotly.figure_factory as ff
 import csv
 from datetime import *
 from params import *
-
-#user id to track
-user = "59bd68e3-2ec5-4828-b2c2-aa30657c986e"
-
-#date/time
-year = 2017
-month = '08'
-day = 26
-
-start_time = datetime(2017, int(month), day, 10, 30, 0, 0)
-end_time = datetime(2017, int(month), day, 22, 0, 0, 0)
+from global_vars import *
 
 #csv to read in
 csvfile = "ndMobile_" + str(year) + "-" + str(month) + "-" + str(day) + ".csv"
@@ -115,6 +105,31 @@ def calc_beacon_freq( users_dict, beacon_id ):
 				curr_time = curr_time + min
 
 	return freq_dict
+
+def plot_gantt( master_dict ):
+	#build user dict
+	df = []
+	for touple, beacons in master_dict[user].items():
+		beacon_id = str(touple[0])
+		print(beacon_id)
+		start = beacons[0].strftime("%Y-%m-%d %H:%M:%S")
+		finish = beacons[1].strftime("%Y-%m-%d %H:%M:%S")
+
+		#find region
+		for region in locations.keys():
+			if int(beacon_id) in locations[region]:
+					beacon_dict = dict(Task=region, Start=start, Finish=finish, Resource='Complete')
+					df.append(beacon_dict)
+
+	#			beacon_dict = dict(Task=beacon_id, Start=start, Finish=finish, Resource='Complete')
+	#			df.append(beacon_dict)
+
+	colors = {'Not Started': 'rgb(220, 0, 0)','Incomplete': (1, 0.9, 0.16), 'Complete': 'rgb(0, 255, 100)'}
+
+	fig = ff.create_gantt(df, colors=colors, index_col='Resource', show_colorbar=False, group_tasks=True)
+	py.iplot(fig, filename='gantt-group-6', world_readable=True)
+
+	return
 
 def print_dict( users_dict ):
 	for user, beacon in users_dict.items():
@@ -221,24 +236,5 @@ if __name__ == "__main__":
 
 		#py.iplot(user_data, filename='user_avg_dwell_bar')
 
-	#build user dict
-	df = []
-	for touple, beacons in master_dict[user].items():
-		beacon_id = str(touple[0])
-		print(beacon_id)
-		start = beacons[0].strftime("%Y-%m-%d %H:%M:%S")
-		finish = beacons[1].strftime("%Y-%m-%d %H:%M:%S")
-
-		#find region
-		for region in locations.keys():
-			if int(beacon_id) in locations[region]:
-					beacon_dict = dict(Task=region, Start=start, Finish=finish, Resource='Complete')
-					df.append(beacon_dict)
-
-	#			beacon_dict = dict(Task=beacon_id, Start=start, Finish=finish, Resource='Complete')
-	#			df.append(beacon_dict)
-
-	colors = {'Not Started': 'rgb(220, 0, 0)','Incomplete': (1, 0.9, 0.16), 'Complete': 'rgb(0, 255, 100)'}
-
-	fig = ff.create_gantt(df, colors=colors, index_col='Resource', show_colorbar=False, group_tasks=True)
-	py.iplot(fig, filename='gantt-group-6', world_readable=True)
+		#Plot single user gantt
+		plot_gantt(master_dict)	
