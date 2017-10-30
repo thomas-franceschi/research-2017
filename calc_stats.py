@@ -26,15 +26,24 @@ locations = {
 	"right_dining" 	: [27, 53, 104, 64, 55] 
 	}
 
+#Meal Times
+breakfast 	= (time(7,0),time(11,0))
+brunch 		= (time(11,0),time(14,0))
+lunch 		= (time(11,0),time(14,0))
+late_lunch 	= (time(14,0),time(16,30))
+wd_dinner 	= (time(16,30),time(21,0))
+f_dinner	= (time(16,30),time(19,30))
+
+
 #authenticate to plotly
 plotly.tools.set_credentials_file(username=USERNAME, api_key=KEY)
 
-def load_csv( filename ):
+def load_csv( filename, curr_date ):
 	
 	users_dict = {}
 	single_user_dict = {}
 
-	with open(filename) as file:
+	with open(filename, 'r', encoding="ascii") as file:
 		#Begin reading file
 		infile = csv.reader(file)
 
@@ -59,14 +68,18 @@ def load_csv( filename ):
 				continue
 			
 			#Skip absurd length dwells
-			if int(dwell_time) >= 60:
+			if int(dwell_time) > 60:
 				continue
 
 			time_entered 	= datetime.strptime(entry[5], "%Y-%m-%d %H:%M:%S")
 			time_exited 	= datetime.strptime(entry[6], "%Y-%m-%d %H:%M:%S")
 
 			#skip off-hours
-			if time_entered < start_time or time_entered > end_time:
+
+			start_time = datetime.combine(curr_date, time(7,0))
+			end_time = datetime.combine(curr_date, time(21,0))
+
+			if time_entered < start_time or time_entered > end_time or time_exited > end_time:
 				continue
 
 			#if no user sub-dict, create
@@ -74,7 +87,6 @@ def load_csv( filename ):
 				users_dict[user_id] = {}
 
 			#insert into dicts
-			#single_user_dict[(beacon_id,time_entered)] = [ time_entered, time_exited, dwell_time ]
 			users_dict[user_id][(beacon_id,time_entered)] = [ time_entered, time_exited, dwell_time ]
 
 			single_user_dict.clear
@@ -82,7 +94,6 @@ def load_csv( filename ):
 	return (users_dict)
 
 #calculate frequency of users over time for a beacon
-###IN PROGRESS###
 def calc_beacon_freq( users_dict, beacon_id ):
 
 	num = str(beacon_id)
@@ -112,7 +123,6 @@ def calc_beacon_freq( users_dict, beacon_id ):
 
 	return freq_dict
 
-###IN PROGRESS###
 def plot_beacon_freq(freq_dict, beacon_id, curr_date):
 	times = []
 	values = []
@@ -127,7 +137,9 @@ def plot_beacon_freq(freq_dict, beacon_id, curr_date):
 	)
 
 	data = [trace]
+
 	py.iplot(data, filename=curr_date.strftime("%Y") + "-" + curr_date.strftime("%m") + "-" + curr_date.strftime("%d") + '_' + str(beacon_id))
+
 	return
 
 def plot_gantt_region( master_dict, user ):
@@ -175,31 +187,114 @@ def find_pairs(users_dict):
 	for user_1 in users_dict:
 		for user_2 in users_dict:
 			#Skip same user
-			if user_1 is user_2:
+			if user_1 == user_2:
 				continue
 
-			if ate_together(user_1, user_2):
+			if ate_together(user_1, user_2, users_dict):
 				num_pairs += 1
 
 	return num_pairs
 
-def ate_together(user_1, user_2):
+def ate_together(user_1, user_2, users_dict):
 
 	friends = False
 
-	#Find start and end timesof each user
-	for touple, beacons in user_1.items():
-		#find start and end
+	user_1_start = datetime(2020,12,30,0,0,0)
+	user_2_start = datetime(2020,12,30,0,0,0)
+	user_1_end = datetime(2000,12,30,0,0,0)
+	user_2_end = datetime(2000,12,30,0,0,0)
 
-		
-	for touple, beacons in user_2.items():
+	#Find start and end times of each user
+	for touple, beacons in users_dict[user_1].items():
 		#find start and end
+		start = beacons[0]
+		end = beacons[1]
 
-	
+		#skip breakfast and dinner
+		if int(start.strftime("%-H")) < 11:
+			continue
+		if int(end.strftime("%-H")) < 11:
+			return friends
+
+		if int(start.strftime("%-H")) > 14:
+			return friends
+		if int(end.strftime("%-H")) > 14:
+			return friends
+
+		if start < user_1_start:
+			user_1_start = start
+
+		if end > user_1_end:
+			user_1_end = end
+
+	for touple, beacons in users_dict[user_2].items():
+		#find start and end
+		start = beacons[0]
+		end = beacons[1]
+
+		#skip breakfast and dinner
+		if int(start.strftime("%-H")) < 11:
+			continue
+
+		if int(end.strftime("%-H")) < 11:
+			return friends
+
+		if int(start.strftime("%-H")) > 14:
+			return friends
+
+		if int(end.strftime("%-H")) > 14:
+			return friends
+
+		if start < user_2_start:
+			user_2_start = start
+
+		if end > user_2_end:
+			user_2_end = end
+
+	#check if started and ended session at same time
+	start_delta = user_1_start - user_2_start
+	end_delta = user_1_end - user_2_end
+
+	if abs(start_delta) < timedelta(minutes=15) and abs(end_delta) < timedelta(minutes=5):
+		friends = True
 
 	return friends
 
-#Clean up soon!
+def plot_pairs(csvfile, curr_date, num_days):
+	
+	my_date = curr_date
+	i = 0
+
+	num_pairs = []
+	dates = []
+
+	while i < num_days:
+		print(my_date)
+		dates.append(my_date.strftime("%Y-%m-%d"))
+
+		master_dict = load_csv(csvfile, my_date)
+		num = find_pairs(master_dict)
+
+		num_pairs.append(num)
+		print(num)
+
+		my_date += timedelta(days=1)
+		i+=1
+		master_dict.clear()
+	
+
+	trace = go.Scatter(
+		x = dates,
+		y = num_pairs
+	)
+
+	data = [trace]
+
+	py.iplot(data, filename=curr_date.strftime("%Y") + "-" + curr_date.strftime("%m") + "-" + curr_date.strftime("%d") + "pairs")
+
+
+
+#Clean up soon!----------------------------------------------------
 if __name__ == "__main__":
 	
 	#init dicts
