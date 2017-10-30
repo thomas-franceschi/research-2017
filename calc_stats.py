@@ -7,9 +7,6 @@ from datetime import *
 from params import *
 from global_vars import *
 
-#csv to read in
-csvfile = "ndMobile_" + str(year) + "-" + str(month) + "-" + str(day) + ".csv"
-
 #beacon groups
 locations = {
 	"entrance" 		: [58, 27, 51, 110],
@@ -99,7 +96,6 @@ def calc_beacon_freq( users_dict, beacon_id ):
 			#filter for current beacon only
 			if touple[0] != num:
 				continue
-			print("found")
 			
 			curr_time 	= beacons[0]
 			end 		= beacons[1]
@@ -107,18 +103,31 @@ def calc_beacon_freq( users_dict, beacon_id ):
 
 			#increment value for each minute user was in range
 			while curr_time <= end:
-				if curr_time.strftime("%H:%M:%S") not in freq_dict.keys():
-					freq_dict[curr_time.strftime("%H:%M:%S")] = int(1)
+				if curr_time.strftime("%H:%M") not in freq_dict.keys():
+					freq_dict[curr_time.strftime("%H:%M")] = int(1)
 				else:
-					freq_dict[curr_time.strftime("%H:%M:%S")] += 1
+					freq_dict[curr_time.strftime("%H:%M")] += 1
 
 				curr_time = curr_time + min
 
 	return freq_dict
 
 ###IN PROGRESS###
-def plot_beacon_freq(freq_dict):
+def plot_beacon_freq(freq_dict, beacon_id, curr_date):
+	times = []
+	values = []
 
+	for time, value in sorted(freq_dict.items()):
+		times.append(time)
+		values.append(value)
+
+	trace = go.Scatter(
+		x = times,
+		y = values
+	)
+
+	data = [trace]
+	py.iplot(data, filename=curr_date.strftime("%Y") + "-" + curr_date.strftime("%m") + "-" + curr_date.strftime("%d") + '_' + str(beacon_id))
 	return
 
 def plot_gantt_region( master_dict, user ):
@@ -145,6 +154,10 @@ def plot_gantt_region( master_dict, user ):
 
 	return
 
+def find_groups():
+	print('hello')
+	return
+
 def print_dict( users_dict ):
 	for user, beacon in users_dict.items():
 		print (user)
@@ -155,6 +168,38 @@ def print_user( users_dict, user ):
 		print (str(touple) + ": " + str(beacons))
 	return
 
+def find_pairs(users_dict):
+	
+	num_pairs = 0
+
+	for user_1 in users_dict:
+		for user_2 in users_dict:
+			#Skip same user
+			if user_1 is user_2:
+				continue
+
+			if ate_together(user_1, user_2):
+				num_pairs += 1
+
+	return num_pairs
+
+def ate_together(user_1, user_2):
+
+	friends = False
+
+	#Find start and end timesof each user
+	for touple, beacons in user_1.items():
+		#find start and end
+
+		
+	for touple, beacons in user_2.items():
+		#find start and end
+
+	
+
+	return friends
+
+#Clean up soon!
 if __name__ == "__main__":
 	
 	#init dicts
