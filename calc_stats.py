@@ -166,9 +166,40 @@ def plot_gantt_region( master_dict, user ):
 
 	return
 
-def find_groups():
-	print('hello')
-	return
+#in progress
+def find_groups(users_dict):
+
+	group_sizes = []
+	group_size 	= 1
+	in_group = []
+
+	for user in users_dict:
+		
+		#reset group size
+		group_size = 1
+
+		#dont double count
+		if user in in_group:
+			continue
+		
+		for other_user in users_dict:
+			#Skip same user
+			if user == other_user:
+				continue
+			
+			#dont double count
+			if other_user in in_group:
+				continue
+
+			if ate_together(user, other_user, users_dict):
+				in_group.append(user)
+				in_group.append(other_user)
+				group_size += 1
+
+		if group_size > 1:
+			group_sizes.append(group_size)
+			
+	return group_sizes
 
 def print_dict( users_dict ):
 	for user, beacon in users_dict.items():
@@ -183,14 +214,24 @@ def print_user( users_dict, user ):
 def find_pairs(users_dict):
 	
 	num_pairs = 0
+	in_pair = []
 
 	for user_1 in users_dict:
+		#don't double count
+		if user_1 is in_pair:
+			continue
 		for user_2 in users_dict:
 			#Skip same user
 			if user_1 == user_2:
 				continue
 
+			#don't double count
+			if user_2 in in_pair:
+				continue
+
 			if ate_together(user_1, user_2, users_dict):
+				in_pair.append(user_1)
+				in_pair.append(user_2)
 				num_pairs += 1
 
 	return num_pairs
@@ -292,7 +333,7 @@ def plot_pairs(csvfile, curr_date, num_days):
 
 	py.iplot(data, filename=curr_date.strftime("%Y") + "-" + curr_date.strftime("%m") + "-" + curr_date.strftime("%d") + "pairs")
 
-#in progress
+#in progress-----------------------------------
 def calc_session_time(users_dict):
 
 	session_times = []
