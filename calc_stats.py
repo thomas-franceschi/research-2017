@@ -292,7 +292,45 @@ def plot_pairs(csvfile, curr_date, num_days):
 
 	py.iplot(data, filename=curr_date.strftime("%Y") + "-" + curr_date.strftime("%m") + "-" + curr_date.strftime("%d") + "pairs")
 
+#in progress
+def calc_session_time(users_dict):
 
+	session_times = []
+
+	session_start = datetime(2020,1,1,0,0)
+	session_end = datetime(2000,1,1,0,0)
+
+	#lunch only
+	start_lunch	= 11
+	end_lunch	= 14
+
+	for user in users_dict:
+		for touple, beacons in users_dict[user].items():
+
+			start = beacons[0]
+			end = beacons[1]
+
+			start_time = int(start.strftime("%-H"))
+			end_time = int(end.strftime("%-H"))
+
+			#skip off hours
+			if start_time < start_lunch or start_time > end_lunch:
+				continue
+			if end_time < start_lunch or end_time > end_lunch:
+				continue
+
+			#find earliest time
+			if start < session_start:
+				session_start = start
+			
+			#find latest time
+			if end > session_end:
+				session_end = end
+
+		session_duration = session_end - session_start
+		session_times.append(session_duration)
+
+	return session_times
 
 #Clean up soon!----------------------------------------------------
 if __name__ == "__main__":
