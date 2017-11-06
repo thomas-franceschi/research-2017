@@ -166,7 +166,7 @@ def plot_gantt_region( master_dict, user ):
 
 	return
 
-#in progress
+#in progress-----------------------
 def find_groups(users_dict):
 
 	group_sizes = []
@@ -296,7 +296,7 @@ def ate_together(user_1, user_2, users_dict):
 	start_delta = user_1_start - user_2_start
 	end_delta = user_1_end - user_2_end
 
-	if abs(start_delta) < timedelta(minutes=15) and abs(end_delta) < timedelta(minutes=5):
+	if abs(start_delta) < timedelta(minutes=8) and abs(end_delta) < timedelta(minutes=5):
 		friends = True
 
 	return friends
@@ -334,18 +334,18 @@ def plot_pairs(csvfile, curr_date, num_days):
 	py.iplot(data, filename=curr_date.strftime("%Y") + "-" + curr_date.strftime("%m") + "-" + curr_date.strftime("%d") + "pairs")
 
 #in progress-----------------------------------
-def calc_session_time(users_dict):
+def calc_session_times(users_dict):
 
 	session_times = []
-
-	session_start = datetime(2020,1,1,0,0)
-	session_end = datetime(2000,1,1,0,0)
 
 	#lunch only
 	start_lunch	= 11
 	end_lunch	= 14
 
 	for user in users_dict:
+		session_start = datetime(2020,1,1,0,0)
+		session_end = datetime(2000,1,1,0,0)
+		
 		for touple, beacons in users_dict[user].items():
 
 			start = beacons[0]
@@ -369,7 +369,9 @@ def calc_session_time(users_dict):
 				session_end = end
 
 		session_duration = session_end - session_start
-		session_times.append(session_duration)
+		session_duration = int(session_duration.total_seconds())
+		if session_duration > 0:
+			session_times.append(session_duration)
 
 	return session_times
 
