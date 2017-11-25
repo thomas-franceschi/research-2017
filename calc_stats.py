@@ -6,6 +6,8 @@ import csv
 from datetime import *
 from params import *
 from global_vars import *
+import codecs
+
 
 #beacon groups
 locations = {
@@ -43,9 +45,14 @@ def load_csv( filename, curr_date ):
 	users_dict = {}
 	single_user_dict = {}
 
-	with open(filename, 'r', encoding="ascii") as file:
+
+
+
+	with codecs.open(filename, 'r', encoding='utf-8') as file:
 		#Begin reading file
+
 		infile = csv.reader(file)
+
 
 		#skip header
 		next(infile)
@@ -215,6 +222,7 @@ def find_pairs(users_dict):
 	
 	num_pairs = 0
 	in_pair = []
+	pairs = []
 
 	for user_1 in users_dict:
 		#don't double count
@@ -233,8 +241,10 @@ def find_pairs(users_dict):
 				in_pair.append(user_1)
 				in_pair.append(user_2)
 				num_pairs += 1
+				pair = (user_1, user_2)
+				pairs.append(pair)
 
-	return num_pairs
+	return (pairs, num_pairs)
 
 def ate_together(user_1, user_2, users_dict):
 
@@ -314,7 +324,7 @@ def plot_pairs(csvfile, curr_date, num_days):
 		dates.append(my_date.strftime("%Y-%m-%d"))
 
 		master_dict = load_csv(csvfile, my_date)
-		num = find_pairs(master_dict)
+		(pairs, num) = find_pairs(master_dict)
 
 		num_pairs.append(num)
 		print(num)
