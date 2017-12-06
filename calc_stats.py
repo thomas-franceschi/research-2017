@@ -226,8 +226,8 @@ def find_pairs(users_dict):
 
 	for user_1 in users_dict:
 		#don't double count
-		if user_1 is in_pair:
-			continue
+		#if user_1 is in_pair:
+		#	continue
 		for user_2 in users_dict:
 			#Skip same user
 			if user_1 == user_2:
@@ -306,7 +306,7 @@ def ate_together(user_1, user_2, users_dict):
 	start_delta = user_1_start - user_2_start
 	end_delta = user_1_end - user_2_end
 
-	if abs(start_delta) < timedelta(minutes=8) and abs(end_delta) < timedelta(minutes=5):
+	if abs(start_delta) < timedelta(minutes=10) and abs(end_delta) < timedelta(minutes=10):
 		friends = True
 
 	return friends

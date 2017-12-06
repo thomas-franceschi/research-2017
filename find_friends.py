@@ -28,7 +28,9 @@ while i < 30:
 	i+=1
 	master_dict.clear()
 			
-for pair, count in pair_dict.items():
-	if count > 1:
-		print(pair + " : " + count)
+
+
+for key in pair_dict.keys():
+	if pair_dict[key] > 1:
+		print(','.join(key) + " : " + str(pair_dict[key]))
 
