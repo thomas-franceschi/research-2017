@@ -234,12 +234,12 @@ def find_pairs(users_dict):
 				continue
 
 			#don't double count
-			if user_2 in in_pair:
-				continue
+			#if user_2 in in_pair:
+			#	continue
 
 			if ate_together(user_1, user_2, users_dict):
-				in_pair.append(user_1)
-				in_pair.append(user_2)
+				#in_pair.append(user_1)
+				#in_pair.append(user_2)
 				num_pairs += 1
 				pair = (user_1, user_2)
 				pairs.append(pair)
